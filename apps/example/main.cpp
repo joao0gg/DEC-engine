@@ -1,4 +1,5 @@
 #include "Surface.hpp"
+#include "Form.hpp"
 #include "log.hpp"
 
 #include "polyscope/polyscope.h"
