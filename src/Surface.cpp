@@ -41,6 +41,7 @@ Surface::load(const std::string &path, std::string name) {
   }
 
   mesh->compress();
+  geom->requireDECOperators();
 
   if (name.empty()) {
     name = fs::path(path).stem().string();

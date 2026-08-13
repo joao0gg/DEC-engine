@@ -7,6 +7,8 @@
 #include "geometrycentral/surface/surface_mesh.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 
+#include <Eigen/Sparse>
+
 class Surface {
  public:
   Surface(std::unique_ptr<geometrycentral::surface::SurfaceMesh> mesh,
@@ -74,6 +76,33 @@ class Surface {
   bool
   isTriangular() const {
     return mesh_->isTriangular();
+  }
+
+  // DEC operators
+
+  const Eigen::SparseMatrix<double> &
+  d0() const {
+    return geom_->d0;
+  }
+
+  const Eigen::SparseMatrix<double> &
+  d1() const {
+    return geom_->d1;
+  }
+
+  const Eigen::SparseMatrix<double> &
+  hodge0() const {
+    return geom_->hodge0;
+  }
+
+  const Eigen::SparseMatrix<double> &
+  hodge1() const {
+    return geom_->hodge1;
+  }
+
+  const Eigen::SparseMatrix<double> &
+  hodge2() const {
+    return geom_->hodge2;
   }
 
  private:
