@@ -1,0 +1,5 @@
+BasedOnStyle: Google
+ColumnLimit: 100
+AlwaysBreakAfterReturnType: AllDefinitions
+SortIncludes: Never
+AlignConsecutiveAssignments: true
