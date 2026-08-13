@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 
@@ -8,30 +9,30 @@
 
 class Surface {
  public:
-  std::string name;
-
   Surface(std::unique_ptr<geometrycentral::surface::SurfaceMesh> mesh,
           std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> geom,
-          const std::string &name = "");
+          std::string name = "");
 
   Surface(Surface &&)                 = default;
   Surface &operator=(Surface &&)      = default;
   Surface(const Surface &)            = delete;
   Surface &operator=(const Surface &) = delete;
 
-  static Surface load(const std::string &path, const std::string &name = "");
+  // reads .obj/.ply/.stl/.off
+  static Surface load(const std::string &path, std::string name = "");
+
+  const std::string &
+  name() const {
+    return name_;
+  }
 
   geometrycentral::surface::SurfaceMesh &
-  mesh() {
-    return *mesh_;
-  }
-  const geometrycentral::surface::SurfaceMesh &
   mesh() const {
     return *mesh_;
   }
 
   geometrycentral::surface::VertexPositionGeometry &
-  geometry() {
+  geometry() const {
     return *geom_;
   }
 
@@ -50,12 +51,33 @@ class Surface {
     return mesh_->nFaces();
   }
 
+  size_t
+  numHalfedges() const {
+    return mesh_->nHalfedges();
+  }
+
   bool
   isManifold() const {
     return mesh_->isManifold();
   }
 
+  bool
+  isEdgeManifold() const {
+    return mesh_->isEdgeManifold();
+  }
+
+  bool
+  isOriented() const {
+    return mesh_->isOriented();
+  }
+
+  bool
+  isTriangular() const {
+    return mesh_->isTriangular();
+  }
+
  private:
-  std::unique_ptr<geometrycentral::surface::SurfaceMesh> mesh_;
-  std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> geom_;
+  std::string name_;
+  mutable std::unique_ptr<geometrycentral::surface::SurfaceMesh> mesh_;
+  mutable std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> geom_;
 };

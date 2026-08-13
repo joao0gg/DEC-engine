@@ -1,5 +1,6 @@
 #include "Surface.hpp"
 
+#include <filesystem>
 #include <stdexcept>
 #include <utility>
 
@@ -8,8 +9,8 @@
 using namespace geometrycentral::surface;
 
 Surface::Surface(std::unique_ptr<SurfaceMesh> mesh, std::unique_ptr<VertexPositionGeometry> geom,
-                 const std::string &name)
-    : name(name), mesh_(std::move(mesh)), geom_(std::move(geom)) {
+                 std::string name)
+    : name_(std::move(name)), mesh_(std::move(mesh)), geom_(std::move(geom)) {
   if (!mesh_) {
     throw std::invalid_argument("Surface: null mesh");
   }
@@ -19,13 +20,31 @@ Surface::Surface(std::unique_ptr<SurfaceMesh> mesh, std::unique_ptr<VertexPositi
 }
 
 Surface
-Surface::load(const std::string &path, const std::string &name) {
-  auto [mesh, geom] = readSurfaceMesh(path);
+Surface::load(const std::string &path, std::string name) {
+  namespace fs = std::filesystem;
 
-  Surface surface(std::move(mesh), std::move(geom), name);
+  if (!fs::exists(path)) {
+    throw std::runtime_error("Surface::load: no such file: " + path);
+  }
 
-  surface.mesh_->compress();
-  surface.geom_->refreshQuantities();
+  std::unique_ptr<SurfaceMesh> mesh;
+  std::unique_ptr<VertexPositionGeometry> geom;
 
-  return surface;
+  try {
+    std::tie(mesh, geom) = readSurfaceMesh(path);
+  } catch (const std::exception &e) {
+    throw std::runtime_error("Surface::load: failed to read " + path + ": " + e.what());
+  }
+
+  if (!mesh || mesh->nVertices() == 0 || mesh->nFaces() == 0) {
+    throw std::runtime_error("Surface::load: empty mesh: " + path);
+  }
+
+  mesh->compress();
+
+  if (name.empty()) {
+    name = fs::path(path).stem().string();
+  }
+
+  return Surface(std::move(mesh), std::move(geom), std::move(name));
 }
