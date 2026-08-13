@@ -1,7 +1,8 @@
 #include "Surface.hpp"
 #include "Form.hpp"
-#include "Operators.hpp"
+#include "operators.hpp"
 #include "log.hpp"
+#include "Laplacian.hpp"
 
 #include "polyscope/polyscope.h"
 #include "polyscope/surface_mesh.h"
