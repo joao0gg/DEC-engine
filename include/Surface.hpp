@@ -107,6 +107,6 @@ class Surface {
 
  private:
   std::string name_;
-  mutable std::unique_ptr<geometrycentral::surface::SurfaceMesh> mesh_;
-  mutable std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> geom_;
+  std::unique_ptr<geometrycentral::surface::SurfaceMesh> mesh_;
+  std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> geom_;
 };

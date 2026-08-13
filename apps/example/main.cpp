@@ -15,11 +15,11 @@ yesno(bool b) {
 
 int
 main(int argc, char const *argv[]) {
-  if (argc != 2) {
-    fatal("Usage: {} <mesh>", argv[0]);
-  }
-
   try {
+    if (argc != 2) {
+      fatal("Usage: {} <mesh>", argv[0]);
+    }
+
     Surface surface = Surface::load(argv[1]);
 
     log("Surface:\n"
