@@ -7,19 +7,24 @@
 
 enum class Duality { Primal, Dual };
 
-template <int K, Duality D = Duality::Primal>
+template <int K, Duality D = Duality::Primal, int C = 1>
 class Form {
  public:
   static constexpr int degree      = K;
   static constexpr Duality duality = D;
+  static constexpr int components  = C;
+
+  static_assert(C >= 1, "Form: component count must be positive");
+
+  using Storage = Eigen::Matrix<double, Eigen::Dynamic, C>;
 
   Form() = default;
 
-  explicit Form(size_t n) : data_(Eigen::VectorXd::Zero(n)) {}
+  explicit Form(size_t n) : data_(Storage::Zero(n, C)) {}
 
-  Form(size_t n, double value) : data_(Eigen::VectorXd::Constant(n, value)) {}
+  Form(size_t n, double value) : data_(Storage::Constant(n, C, value)) {}
 
-  explicit Form(Eigen::VectorXd data) : data_(std::move(data)) {}
+  explicit Form(Storage data) : data_(std::move(data)) {}
 
   static Form
   zeros(size_t n) {
@@ -33,31 +38,45 @@ class Form {
 
   static Form
   random(size_t n) {
-    return Form(Eigen::VectorXd::Random(n));
+    return Form(Storage::Random(n, C));
   }
 
   size_t
   size() const {
-    return static_cast<size_t>(data_.size());
+    return static_cast<size_t>(data_.rows());
   }
 
-  Eigen::VectorXd &
+  Storage &
   data() {
     return data_;
   }
 
-  const Eigen::VectorXd &
+  const Storage &
   data() const {
     return data_;
   }
 
   double &
-  operator[](size_t i) {
+  operator()(size_t i, int c) {
+    return data_(i, c);
+  }
+
+  double
+  operator()(size_t i, int c) const {
+    return data_(i, c);
+  }
+
+  double &
+  operator[](size_t i)
+    requires(C == 1)
+  {
     return data_[i];
   }
 
   double
-  operator[](size_t i) const {
+  operator[](size_t i) const
+    requires(C == 1)
+  {
     return data_[i];
   }
 
@@ -87,7 +106,7 @@ class Form {
   }
   Form
   operator-() const {
-    return Form(Eigen::VectorXd(-data_));
+    return Form(Storage(-data_));
   }
 
   double
@@ -103,59 +122,65 @@ class Form {
   double
   dot(const Form &other) const {
     checkSize(other);
-    return data_.dot(other.data_);
+    return (data_.array() * other.data_.array()).sum();
   }
 
  private:
   void
   checkSize(const Form &other) const {
-    if (data_.size() != other.data_.size()) {
+    if (data_.rows() != other.data_.rows()) {
       throw std::invalid_argument("Form: size mismatch");
     }
   }
 
-  Eigen::VectorXd data_;
+  Storage data_;
 };
 
-template <int K, Duality D>
-Form<K, D>
-operator+(Form<K, D> a, const Form<K, D> &b) {
+template <int K, Duality D, int C>
+Form<K, D, C>
+operator+(Form<K, D, C> a, const Form<K, D, C> &b) {
   a += b;
   return a;
 }
 
-template <int K, Duality D>
-Form<K, D>
-operator-(Form<K, D> a, const Form<K, D> &b) {
+template <int K, Duality D, int C>
+Form<K, D, C>
+operator-(Form<K, D, C> a, const Form<K, D, C> &b) {
   a -= b;
   return a;
 }
 
-template <int K, Duality D>
-Form<K, D>
-operator*(Form<K, D> a, double s) {
+template <int K, Duality D, int C>
+Form<K, D, C>
+operator*(Form<K, D, C> a, double s) {
   a *= s;
   return a;
 }
 
-template <int K, Duality D>
-Form<K, D>
-operator*(double s, Form<K, D> a) {
+template <int K, Duality D, int C>
+Form<K, D, C>
+operator*(double s, Form<K, D, C> a) {
   a *= s;
   return a;
 }
 
-template <int K, Duality D>
-Form<K, D>
-operator/(Form<K, D> a, double s) {
+template <int K, Duality D, int C>
+Form<K, D, C>
+operator/(Form<K, D, C> a, double s) {
   a /= s;
   return a;
 }
 
-using Form0 = Form<0, Duality::Primal>;
-using Form1 = Form<1, Duality::Primal>;
-using Form2 = Form<2, Duality::Primal>;
+// aliases
 
-using DualForm0 = Form<0, Duality::Dual>;
-using DualForm1 = Form<1, Duality::Dual>;
-using DualForm2 = Form<2, Duality::Dual>;
+using Form0 = Form<0, Duality::Primal, 1>;
+using Form1 = Form<1, Duality::Primal, 1>;
+using Form2 = Form<2, Duality::Primal, 1>;
+
+using DualForm0 = Form<0, Duality::Dual, 1>;
+using DualForm1 = Form<1, Duality::Dual, 1>;
+using DualForm2 = Form<2, Duality::Dual, 1>;
+
+using VectorForm0 = Form<0, Duality::Primal, 3>;
+using VectorForm1 = Form<1, Duality::Primal, 3>;
+using VectorForm2 = Form<2, Duality::Primal, 3>;
