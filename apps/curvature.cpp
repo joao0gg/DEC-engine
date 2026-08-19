@@ -1,15 +1,9 @@
 #include "Form.hpp"
 #include "Laplacian.hpp"
-#include "Surface.hpp"
-#include "log.hpp"
-
-#include "polyscope/polyscope.h"
-#include "polyscope/surface_mesh.h"
+#include "common.hpp"
 
 #include <algorithm>
 #include <exception>
-
-#define DEFAULT_SURFACE_COLOR {0.91f, 0.85f, 0.77f}
 
 int
 main(int argc, char const *argv[]) {
@@ -19,7 +13,8 @@ main(int argc, char const *argv[]) {
     }
 
     Surface surface = Surface::load(argv[1]);
-    Laplacian lap   = laplacian0(surface);
+
+    Laplacian lap = laplacian0(surface);
 
     // vertex positions as a vector-valued 0-form
     VectorForm0 X(surface.numVertices());
@@ -57,10 +52,7 @@ main(int argc, char const *argv[]) {
 
     polyscope::init();
 
-    polyscope::SurfaceMesh *psMesh = polyscope::registerSurfaceMesh(
-        surface.name(), surface.geometry().inputVertexPositions,
-        surface.mesh().getFaceVertexList());
-    psMesh->setSurfaceColor(DEFAULT_SURFACE_COLOR);
+    polyscope::SurfaceMesh *psMesh = registerSurface(surface);
 
     auto *q = psMesh->addVertexScalarQuantity("mean curvature", H);
     q->setColorMap("jet");

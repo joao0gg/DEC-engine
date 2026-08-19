@@ -1,18 +1,7 @@
 #include "Laplacian.hpp"
-#include "Surface.hpp"
-#include "log.hpp"
-
-#include "polyscope/polyscope.h"
-#include "polyscope/surface_mesh.h"
+#include "common.hpp"
 
 #include <exception>
-
-#define DEFAULT_SURFACE_COLOR {0.91f, 0.85f, 0.77f}
-
-static constexpr const char *
-yesno(bool b) {
-  return b ? "yes" : "no";
-}
 
 int
 main(int argc, char const *argv[]) {
@@ -22,7 +11,8 @@ main(int argc, char const *argv[]) {
     }
 
     Surface surface = Surface::load(argv[1]);
-    Laplacian lap   = laplacian0(surface);
+
+    Laplacian lap = laplacian0(surface);
 
     const long long euler_characteristic = static_cast<long long>(surface.numVertices()) -
                                            static_cast<long long>(surface.numEdges()) +
@@ -53,9 +43,9 @@ main(int argc, char const *argv[]) {
         "  hodge1 min:   {:.6e}  ({} negative of {})\n",
         surface.name(), 
         surface.numVertices(), surface.numEdges(), surface.numFaces(),
-        surface.mesh().nConnectedComponents(), 
-        yesno(surface.mesh().hasBoundary()),
-        yesno(surface.isManifold()), yesno(surface.isOriented()), yesno(surface.isTriangular()),
+        surface.mesh().nConnectedComponents(),
+        YESNO(surface.mesh().hasBoundary()),
+        YESNO(surface.isManifold()), YESNO(surface.isOriented()), YESNO(surface.isTriangular()),
         euler_characteristic, 
         dd.norm(), 
         asym.norm(), 
@@ -68,10 +58,7 @@ main(int argc, char const *argv[]) {
 
     polyscope::init();
 
-    polyscope::SurfaceMesh *psMesh = polyscope::registerSurfaceMesh(
-        surface.name(), surface.geometry().inputVertexPositions,
-        surface.mesh().getFaceVertexList());
-    psMesh->setSurfaceColor(DEFAULT_SURFACE_COLOR);
+    polyscope::SurfaceMesh *psMesh = registerSurface(surface);
 
     psMesh->addVertexScalarQuantity("dual area", lap.M.diagonal())
         ->setColorMap("jet")
