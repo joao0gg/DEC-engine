@@ -3,3 +3,4 @@ ColumnLimit: 100
 AlwaysBreakAfterReturnType: AllDefinitions
 SortIncludes: Never
 AlignConsecutiveAssignments: true
+PenaltyBreakAssignment: 1000

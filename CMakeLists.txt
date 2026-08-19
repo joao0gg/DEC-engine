@@ -27,5 +27,10 @@ add_library(dec_engine ${DEC_ENGINE_SOURCES})
 target_include_directories(dec_engine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(dec_engine PUBLIC geometry-central)
 
-add_executable(dec_example apps/example/main.cpp)
-target_link_libraries(dec_example PRIVATE dec_engine polyscope)
+# apps/
+file(GLOB DEC_APPS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/apps/*.cpp")
+foreach(app_src ${DEC_APPS})
+  get_filename_component(app_name ${app_src} NAME_WE)
+  add_executable(${app_name} ${app_src})
+  target_link_libraries(${app_name} PRIVATE dec_engine polyscope)
+endforeach()
